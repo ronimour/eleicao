@@ -1,0 +1,27 @@
+REFINEMENT
+   ELEITORADO_R
+REFINES
+   ELEITORADO
+
+VARIABLES
+   eleitores_r, secao_r
+INVARIANT eleitores_r : seq(ELEITORES) 
+    & secao_r : seq(1..3)
+    & card(eleitores_r) = card(secao_r)
+    & ran(eleitores_r) = dom(secao)
+    & !xx.( xx: 1..card(eleitores_r) => secao(eleitores_r(xx)) = secao_r(xx))
+    
+INITIALISATION 
+    /*
+    ANY eleitores WHERE 
+        eleitores : iseq(ELEITORES)
+        & card(eleitores) = card(ELEITORES)
+    THEN
+        eleitores_r := eleitores
+    END
+    */
+    eleitores_r ::seq(ELEITORES)
+    || secao_r := %xx.(xx : 1..card(eleitores_r) | xx mod 3)
+                 
+    
+END

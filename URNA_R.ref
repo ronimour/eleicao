@@ -1,0 +1,51 @@
+REFINEMENT
+   URNA_R(CANDIDATOS,secao_num)
+REFINES
+   URNA
+SETS VOTOU = {SIM,NAO}
+ABSTRACT_VARIABLES
+   votos_r ,
+   secao_da_urna_r ,
+   ELEITORES_DA_URNA_R ,
+   estado_atual_r
+INVARIANT ELEITORES_DA_URNA_R : 1..card(ELEITORES_DA_URNA) --> VOTOU
+          & card(dom(ELEITORES_DA_URNA_R |> {NAO})) = card(ELEITORES_DA_URNA)
+          & votos_r : 1..card(CANDIDATOS) --> NAT
+          & ran(votos_r) = ran(votos) 
+
+INITIALISATION ELEITORES_DA_URNA_R := 1..card(ELEITORES_DA_URNA)*{NAO}
+
+OPERATIONS
+   zeresima =
+   BEGIN
+       votos := {} ||
+       estado_atual := EXECUCAO
+   END
+   ;
+
+   votar ( cc , ee ) =
+   PRE
+       cc : CANDIDATOS & ee : ELEITORES_DA_URNA & estado_atual = EXECUCAO
+   THEN
+       votos ( cc ) := votos ( cc ) + 1 ||
+       ELEITORES_DA_URNA := ELEITORES_DA_URNA - { ee }
+   END
+   ;
+
+   finalizar =
+   PRE
+       estado_atual = EXECUCAO
+   THEN
+       estado_atual := FINALIZADO
+   END
+   ;
+
+   ss <-- votos_do_candidato ( cc ) =
+   PRE
+       cc : CANDIDATOS
+   THEN
+       ss := votos ( cc )
+   END
+
+
+END
