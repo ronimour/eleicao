@@ -3,48 +3,50 @@ REFINEMENT
 REFINES
    URNA
 SETS VOTOU = {SIM,NAO}
-ABSTRACT_VARIABLES
+VARIABLES
+   candidatos_r, 
    votos_r ,
    secao_da_urna_r ,
-   ELEITORES_DA_URNA_R ,
-   estado_atual_r
-INVARIANT ELEITORES_DA_URNA_R : 1..card(ELEITORES_DA_URNA) --> VOTOU
-          & card(dom(ELEITORES_DA_URNA_R |> {NAO})) = card(ELEITORES_DA_URNA)
-          & votos_r : 1..card(CANDIDATOS) --> NAT
-          & ran(votos_r) = ran(votos) 
+   eleitores_da_urna_r ,
+   estado_atual_r,
+   estados_r
+INVARIANT eleitores_da_urna_r : 1..card(ELEITORES_DA_URNA) --> VOTOU
+          & card(dom(eleitores_da_urna_r |> {NAO})) = card(ELEITORES_DA_URNA)
+          & candidatos_r : iseq1(CANDIDATOS)
+          & votos_r : seq1(NAT)
+          & secao_da_urna_r : NAT
+          & card(candidatos_r) = card(votos_r)
+          & ran(candidatos_r) = dom(votos)
+          & !xx.( xx: 1..card(candidatos_r) => votos(candidatos_r(xx)) = votos_r(xx))
+          & ran(votos_r) = ran(votos)
+          & estados_r : 1..3 >-> ESTADOS
+          & estado_atual_r : 1..3
 
-INITIALISATION ELEITORES_DA_URNA_R := 1..card(ELEITORES_DA_URNA)*{NAO}
+INITIALISATION eleitores_da_urna_r := %xx.(xx:1..card(eleitores_da_urna_r) | NAO)
+               || estados_r := {1|->PRE_EXECUCAO, 2|->EXECUCAO,3|->FINALIZADO}  
+               || estado_atual_r := 1
+               || secao_da_urna_r := secao_num 
 
 OPERATIONS
    zeresima =
    BEGIN
-       votos := {} ||
-       estado_atual := EXECUCAO
-   END
-   ;
+       estado_atual_r := 2   
+   END;
 
    votar ( cc , ee ) =
-   PRE
-       cc : CANDIDATOS & ee : ELEITORES_DA_URNA & estado_atual = EXECUCAO
-   THEN
-       votos ( cc ) := votos ( cc ) + 1 ||
-       ELEITORES_DA_URNA := ELEITORES_DA_URNA - { ee }
-   END
-   ;
+   BEGIN
+       eleitores_da_urna_r(ee) := NAO
+       || votos_r( dom(candidatos_r |> {cc}) ):= votos_r( dom(candidatos_r |> {cc}) ) + 1
+   END;
 
    finalizar =
-   PRE
-       estado_atual = EXECUCAO
-   THEN
-       estado_atual := FINALIZADO
-   END
-   ;
+   BEGIN
+       estado_atual_r := 3  
+   END;
 
    ss <-- votos_do_candidato ( cc ) =
-   PRE
-       cc : CANDIDATOS
-   THEN
-       ss := votos ( cc )
+   BEGIN
+       ss := votos_r( dom(candidatos_r |> {cc}) )
    END
 
 
